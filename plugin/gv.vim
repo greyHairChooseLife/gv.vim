@@ -229,7 +229,19 @@ function! s:log_opts(bang, visual, line1, line2, reflog)
   return [['--graph'], []]
 endfunction
 
+function! s:close_gv_buffers()
+  " GV 파일 형식을 가진 모든 버퍼를 찾아서 종료
+  for buf in getbufinfo({'bufloaded': 1})
+    if getbufvar(buf.bufnr, '&filetype') ==# 'GV'
+      execute buf.bufnr.'bwipeout'
+    endif
+  endfor
+endfunction
+
 function! s:list(log_opts)
+  " 기존 GV 버퍼 종료
+  call s:close_gv_buffers()
+
   let default_opts = ['--color=never']
   let git_command = index(a:log_opts, 'reflog') != -1 ? 'reflog' : 'log'
   if git_command ==# 'reflog'
@@ -255,7 +267,6 @@ function! s:list(log_opts)
   redraw
   echo 'o: open split / O: open tab / gb: GBrowse / q: quit'
 endfunction
-
 
 
 
@@ -362,3 +373,4 @@ function! s:gv(bang, visual, line1, line2, args) abort
 endfunction
 
 command! -bang -nargs=* -range=0 -complete=customlist,fugitive#CompleteObject GV call s:gv(<bang>0, <count>, <line1>, <line2>, <q-args>)
+
