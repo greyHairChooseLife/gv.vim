@@ -233,7 +233,7 @@ function! s:close_gv_buffers()
   " GV 파일 형식을 가진 모든 버퍼를 찾아서 종료
   for buf in getbufinfo({'bufloaded': 1})
     if getbufvar(buf.bufnr, '&filetype') ==# 'GV'
-      execute buf.bufnr.'bwipeout'
+      execute 'bwipeout!' buf.bufnr
     endif
   endfor
 endfunction
