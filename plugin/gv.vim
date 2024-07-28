@@ -128,6 +128,16 @@ function! s:dot()
   return empty(sha) ? '' : ':Git  '.sha."\<s-left>\<left>"
 endfunction
 
+function! s:dotDiffviewFile()
+  let sha = gv#sha()
+  return empty(sha) ? '' : ':DiffviewOpen '.sha.'^..'.sha."\<CR>"
+endfunction
+
+function! s:dotDiffviewCommit()
+  let sha = gv#sha()
+  return empty(sha) ? '' : ':DiffviewFileHistory --range='.sha.'^..HEAD'."\<CR>"
+endfunction
+
 function! s:maps()
   nnoremap <silent> <buffer> q    :$wincmd w <bar> close<cr>
   nnoremap <silent> <buffer> <nowait> gq :$wincmd w <bar> close<cr>
@@ -138,7 +148,9 @@ function! s:maps()
   xnoremap <silent> <buffer> <cr> :<c-u>call <sid>open(1)<cr>
   xnoremap <silent> <buffer> o    :<c-u>call <sid>open(1)<cr>
   xnoremap <silent> <buffer> O    :<c-u>call <sid>open(1, 1)<cr>
-  nnoremap          <buffer> <expr> .  <sid>dot()
+  nnoremap          <buffer> <expr> .g  <sid>dot()
+  nnoremap          <buffer> <expr> .df  <sid>dotDiffviewFile()
+  nnoremap          <buffer> <expr> .dc  <sid>dotDiffviewCommit()
   nnoremap <silent> <buffer> <expr> ]] <sid>move('')
   nnoremap <silent> <buffer> <expr> ][ <sid>move('')
   nnoremap <silent> <buffer> <expr> [[ <sid>move('b')
@@ -209,7 +221,7 @@ function! s:log_opts(bang, visual, line1, line2)
 endfunction
 
 function! s:list(log_opts)
-  let default_opts = ['--color=never', '--date=short', '--format=%cd %h%d %s (%an)']
+  let default_opts = ['--color=never', '--date=short', '--format=%cd %h%d %s']
   let git_args = ['log'] + default_opts + a:log_opts
   let git_log_cmd = FugitiveShellCommand(git_args)
 
