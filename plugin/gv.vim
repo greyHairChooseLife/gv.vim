@@ -211,25 +211,34 @@ function! s:check_buffer(current)
   endif
 endfunction
 
-function! s:log_opts(bang, visual, line1, line2)
+function! s:log_opts(bang, visual, line1, line2, reflog)
   if a:visual || a:bang
     let current = expand('%')
     call s:check_buffer(current)
     return a:visual ? [[printf('-L%d,%d:%s', a:line1, a:line2, current)], []] : [['--follow'], ['--', current]]
   endif
+  if a:reflog
+    return [['reflog'], []]
+  endif
   return [['--graph'], []]
 endfunction
 
 function! s:list(log_opts)
-  let default_opts = ['--color=never', '--date=short', '--format=%cd %h%d %s']
-  let git_args = ['log'] + default_opts + a:log_opts
-  let git_log_cmd = FugitiveShellCommand(git_args)
+  let default_opts = ['--color=never']
+  let git_command = index(a:log_opts, 'reflog') != -1 ? 'reflog' : 'log'
+  if git_command ==# 'reflog'
+    call extend(default_opts, ['--format=%cd %h %gs', '--date=short'])
+  else
+    call extend(default_opts, ['--date=short', '--format=%cd %h%d %s'])
+  endif
+  let git_args = [git_command] + default_opts + filter(copy(a:log_opts), 'v:val != "reflog"')
+  let git_cmd = FugitiveShellCommand(git_args)
 
   let repo_short_name = fnamemodify(substitute(FugitiveGitDir(), '[\\/]\.git[\\/]\?$', '', ''), ':t')
   let bufname = repo_short_name.' '.join(a:log_opts)
   silent exe (bufexists(bufname) ? 'buffer' : 'file') fnameescape(bufname)
 
-  call s:fill(git_log_cmd)
+  call s:fill(git_cmd)
   setlocal nowrap tabstop=8 cursorline iskeyword+=#
 
   if !exists(':GBrowse')
@@ -240,6 +249,10 @@ function! s:list(log_opts)
   redraw
   echo 'o: open split / O: open tab / gb: GBrowse / q: quit'
 endfunction
+
+
+
+
 
 function! s:trim(arg)
   let arg = substitute(a:arg, '\s*$', '', '')
@@ -325,7 +338,8 @@ function! s:gv(bang, visual, line1, line2, args) abort
       call s:check_buffer(expand('%'))
       call s:gl(bufnr(''), a:visual)
     else
-      let [opts1, paths1] = s:log_opts(a:bang, a:visual, a:line1, a:line2)
+      let reflog = a:args ==# 'reflog'
+      let [opts1, paths1] = s:log_opts(a:bang, a:visual, a:line1, a:line2, reflog)
       let [opts2, paths2] = s:split_pathspec(gv#shellwords(a:args))
       let log_opts = opts1 + opts2 + paths1 + paths2
       call s:setup(FugitiveRemoteUrl())
