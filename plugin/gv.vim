@@ -265,7 +265,7 @@ function! s:list(log_opts)
   call s:maps()
   setf GV
   redraw
-  echo 'o: open split / O: open tab / gb: GBrowse / q: quit'
+  echo '.g: Git <rev> / .ri: rebase -i / .df: Diffview File / .dc: Diffview Commit History / gb: GBrowse / gq: Quit'
 endfunction
 
 
