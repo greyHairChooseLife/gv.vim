@@ -130,7 +130,7 @@ endfunction
 
 function! s:dotRebase()
   let sha = gv#sha()
-  return empty(sha) ? '' : ':Git rebase -i '.sha.'^'."\<CR>"
+  return empty(sha) ? '' : ':silent Git rebase -i '.sha.'^'."\<CR>"
 endfunction
 
 function! s:dotDiffviewFile()
@@ -154,9 +154,9 @@ function! s:maps()
   xnoremap <silent> <buffer> o    :<c-u>call <sid>open(1)<cr>
   xnoremap <silent> <buffer> O    :<c-u>call <sid>open(1, 1)<cr>
   nnoremap          <buffer> <expr> .g  <sid>dot()
-  nnoremap          <buffer> <expr> .ri  <sid>dotRebase()
-  nnoremap          <buffer> <expr> .df  <sid>dotDiffviewFile()
-  nnoremap          <buffer> <expr> .dc  <sid>dotDiffviewCommit()
+  nnoremap <silent> <buffer> <expr> .ri  <sid>dotRebase()
+  nnoremap <silent> <buffer> <expr> .df  <sid>dotDiffviewFile()
+  nnoremap <silent> <buffer> <expr> .dc  <sid>dotDiffviewCommit()
   nnoremap <silent> <buffer> <expr> ]] <sid>move('')
   nnoremap <silent> <buffer> <expr> ][ <sid>move('')
   nnoremap <silent> <buffer> <expr> [[ <sid>move('b')
